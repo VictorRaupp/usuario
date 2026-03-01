@@ -1,6 +1,8 @@
 package com.victor.usuario.controller;
 
 import com.victor.usuario.business.UsuarioService;
+import com.victor.usuario.business.dto.EnderecoDTO;
+import com.victor.usuario.business.dto.TelefoneDTO;
 import com.victor.usuario.business.dto.UsuarioDTO;
 import com.victor.usuario.infrastructure.entity.Usuario;
 import com.victor.usuario.infrastructure.security.JwtUtil;
@@ -21,31 +23,45 @@ public class UsuarioController {
     private final JwtUtil jwtUtil;
 
     @PostMapping
-    public ResponseEntity<UsuarioDTO> salvaUsuario(@RequestBody UsuarioDTO usuarioDTO){
+    public ResponseEntity<UsuarioDTO> salvaUsuario(@RequestBody UsuarioDTO usuarioDTO) {
         return ResponseEntity.ok(usuarioService.salvaUsuario(usuarioDTO));
     }
+
     @PostMapping("/login")
-    public String login(@RequestBody UsuarioDTO usuarioDTO){
-        Authentication authentication =  authenticationManager.authenticate(
+    public String login(@RequestBody UsuarioDTO usuarioDTO) {
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(usuarioDTO.getEmail(),
                         usuarioDTO.getSenha())
         );
-        return  "Bearer "+ jwtUtil.generateToken(authentication.getName());
+        return "Bearer " + jwtUtil.generateToken(authentication.getName());
     }
 
     @GetMapping
-    public ResponseEntity<Usuario> buscarUsuarioPorEmail(@RequestParam("email") String email){
+    public ResponseEntity<Usuario> buscarUsuarioPorEmail(@RequestParam("email") String email) {
         return ResponseEntity.ok(usuarioService.buscarUsuarioPorEmail(email));
     }
 
     @DeleteMapping("/{email}")
-    public ResponseEntity<Void> deleteUsuarioPorEmail(@PathVariable String email){
+    public ResponseEntity<Void> deleteUsuarioPorEmail(@PathVariable String email) {
         usuarioService.deletaUsuarioPorEmail(email);
         return ResponseEntity.ok().build();
     }
+
     @PutMapping
     public ResponseEntity<UsuarioDTO> atualizaDadosUsuario(@RequestBody UsuarioDTO dto,
-                                @RequestBody("Authorization" String token){
+                                                           @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(usuarioService.atualizaDadosUsuario(token, dto));
+    }
+
+    @PostMapping("/endereco")
+    public ResponseEntity<EnderecoDTO> cadastraEndereco(@RequestBody EnderecoDTO dto,
+                                                        @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(usuarioService.cadastraEndereco(token, dto));
+    }
+
+    @PostMapping("/telefone")
+    public ResponseEntity<TelefoneDTO> cadastraTelefone(@RequestBody TelefoneDTO dto,
+                                                        @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(usuarioService.cadastraTelefone(token, dto));
     }
 }
